@@ -22,6 +22,9 @@ public class Chomp extends JFrame implements ActionListener {
     private JButton p1Marker, p2Marker;
     private boolean isP1Marker, isP2Marker = false;
 
+    private JButton backButton;
+    private JButton softResetButton;
+
     public Chomp() {
         setUpWindow();
         setUpGame();
@@ -62,18 +65,20 @@ public class Chomp extends JFrame implements ActionListener {
         board = new Node[yBoardSize][xBoardSize];
         buttons = new JButton[yBoardSize][xBoardSize];
         GridBagConstraints c = new GridBagConstraints();
+        // made all of the buttons the same square size:
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 1;
-        c.weighty = 1;
         c.gridx = 0;
         c.gridy = 0;
+        
         // fill the pane with buttons of size 50 x 50
         for (int i = 0; i < yBoardSize; i++) {
             for (int j = 0; j < xBoardSize; j++) {
                 board[i][j] = new Node();
                 buttons[i][j] = new JButton();
                 buttons[i][j].addActionListener(this);
-                buttons[i][j].setPreferredSize(new Dimension(50, 50));
+                // make them squares
+                buttons[i][j].setPreferredSize(new Dimension(Math.max(((int) ((window.getHeight() - 100) / (double)yBoardSize)), 50), Math.max(((int) ((window.getHeight() - 100) / (double)yBoardSize)), 50)));
+                buttons[i][j].setText((j + 1) + ", " + (Math.abs(i - yBoardSize)));
                 panel.add(buttons[i][j], c);
                 c.gridx++;
             }
@@ -82,7 +87,7 @@ public class Chomp extends JFrame implements ActionListener {
         }
 
         scroll = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scroll.setBounds(0, 0, Math.min(50 * xBoardSize + 10, window.getWidth() - 100 ) , Math.min(50 * yBoardSize + 10, window.getHeight() - 100) );
+        scroll.setBounds(0, 0,  window.getWidth() - 100,  window.getHeight() - 100);
 
         window.add(scroll);
 
@@ -91,8 +96,13 @@ public class Chomp extends JFrame implements ActionListener {
         restartButton.addActionListener(this);
         window.add(restartButton);
 
+        softResetButton = new JButton("Soft Reset");
+        softResetButton.setBounds(100, window.getHeight() - 50, 100, 30);
+        softResetButton.addActionListener(this);
+        window.add(softResetButton);
+
         textPane = new JTextPane();
-        textPane.setBounds(100, window.getHeight() - 50, window.getWidth() - 100, 30);
+        textPane.setBounds(300, window.getHeight() - 50, 100, 30);
         isPlayer1Turn = true;
         textPane.setText("Player 1's turn");
         textPane.setEditable(false);
@@ -116,6 +126,12 @@ public class Chomp extends JFrame implements ActionListener {
         p2Marker.setBorderPainted(true);
         p2Marker.addActionListener(this);
         window.add(p2Marker);
+
+        backButton = new JButton("Back");
+        backButton.setBounds(200, window.getHeight() - 50, 100, 30);
+        backButton.addActionListener(this);
+        window.add(backButton);
+        
     }
 
     private boolean isInButtons(JButton button) {
@@ -136,6 +152,15 @@ public class Chomp extends JFrame implements ActionListener {
                 window.removeAll();
                 window.repaint();
                 setUpGame();
+                return;
+            }
+            if (e.getSource() == softResetButton) {
+                window.removeAll();
+                window.repaint();
+                setUpBoard();
+                return;
+            }
+            if (e.getSource() == backButton) {
                 return;
             }
             if (e.getSource() == startButton) {
@@ -212,6 +237,7 @@ public class Chomp extends JFrame implements ActionListener {
                                             buttons[k][l].setOpaque(false);
                                             buttons[k][l].setContentAreaFilled(false);
                                             buttons[k][l].setBorderPainted(false);
+                                            buttons[k][l].setText("");
                                             board[k][l].eat();
                                         } else {
                                             buttons[k][l].setVisible(false);
