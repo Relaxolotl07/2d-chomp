@@ -16,6 +16,7 @@ public class Chomp extends JFrame implements ActionListener {
     private JTextPane textPane;
 
     private Node[][] board;
+    private int turn;
     private int xBoardSize;
     private int yBoardSize;
     private boolean isPlayer1Turn = true;
@@ -58,6 +59,7 @@ public class Chomp extends JFrame implements ActionListener {
     }
 
     private void setUpBoard() {
+        turn = 1;
 
         panel = new JPanel();  
         panel.setLayout(new GridBagLayout());
@@ -166,6 +168,33 @@ public class Chomp extends JFrame implements ActionListener {
                 return;
             }
             if (e.getSource() == backButton) {
+                turn--;
+                // if turn is negative, do not uneat any squares
+                if (turn < 0) {
+                    return;
+                }
+                
+                // loop through the last buttons pressed and uneat all squares on turn number
+                for (int i = 0; i < yBoardSize; i++) {
+                    for (int j = 0; j < xBoardSize; j++) {
+                        if (board[i][j].getTurnEaten() == turn) {
+                            if (i == 0 || j == 0)
+                            {
+                                buttons[i][j].setOpaque(true);
+                                buttons[i][j].setContentAreaFilled(true);
+                                buttons[i][j].setBorderPainted(true);
+                                buttons[i][j].setText((j + 1) + ", " + (Math.abs(i - yBoardSize)));
+                                board[i][j].unEat();
+                            } else {
+                                buttons[i][j].setVisible(true);
+                                board[i][j].unEat();
+                            }
+                        }
+                    }
+                }
+                isPlayer1Turn = !isPlayer1Turn;
+                textPane.setText(isPlayer1Turn ? "Player 1's turn" : "Player 2's turn");
+                window.repaint();
                 return;
             }
             if (e.getSource() == startButton) {
@@ -247,10 +276,10 @@ public class Chomp extends JFrame implements ActionListener {
                                             buttons[k][l].setContentAreaFilled(false);
                                             buttons[k][l].setBorderPainted(false);
                                             buttons[k][l].setText("");
-                                            board[k][l].eat();
+                                            board[k][l].eat(turn);
                                         } else {
                                             buttons[k][l].setVisible(false);
-                                            board[k][l].eat();
+                                            board[k][l].eat(turn);
                                         }
                                     }
                                 }
@@ -258,6 +287,7 @@ public class Chomp extends JFrame implements ActionListener {
                         }
                     }
                 }
+                turn++;
             }
         }
     }
@@ -271,16 +301,29 @@ public class Chomp extends JFrame implements ActionListener {
 class Node {
     // instance vars
     private boolean isEaten;
+    private int turnEaten;
 
     public Node() {
         isEaten = false;
+        turnEaten = -1;
     }
 
     public boolean isEaten() {
         return isEaten;
     }
 
-    public void eat() {
+    public int getTurnEaten() {
+        return turnEaten;
+    }
+
+    public void unEat() {
+        isEaten = false;
+        turnEaten = -1;
+    }
+
+    public void eat(int turn) {
         isEaten = true;
+        if (turnEaten == -1)
+            turnEaten = turn;
     }
 }
