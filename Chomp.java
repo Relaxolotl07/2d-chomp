@@ -24,6 +24,7 @@ public class Chomp extends JFrame implements ActionListener {
 
     private JButton backButton;
     private JButton softResetButton;
+    private JButton switchTurnButton;
 
     public Chomp() {
         setUpWindow();
@@ -132,6 +133,10 @@ public class Chomp extends JFrame implements ActionListener {
         backButton.addActionListener(this);
         window.add(backButton);
         
+        switchTurnButton = new JButton("Switch Turn");
+        switchTurnButton.setBounds(200, window.getHeight() - 100, 100, 50);
+        switchTurnButton.addActionListener(this);
+        window.add(switchTurnButton);
     }
 
     private boolean isInButtons(JButton button) {
@@ -206,6 +211,10 @@ public class Chomp extends JFrame implements ActionListener {
                     p2Marker.setBackground(Color.BLUE);
                     p1Marker.setBackground(Color.RED);
                 }
+            }
+            if (e.getSource() == switchTurnButton) {
+                isPlayer1Turn = !isPlayer1Turn;
+                textPane.setText(isPlayer1Turn ? "Player 1's turn" : "Player 2's turn");
             }
             if(isInButtons((JButton)e.getSource())) {
                 isPlayer1Turn = !isPlayer1Turn;
