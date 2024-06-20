@@ -19,6 +19,8 @@ public class Chomp extends JFrame implements ActionListener {
     private int xBoardSize;
     private int yBoardSize;
     private boolean isPlayer1Turn = true;
+    private JButton p1Marker, p2Marker;
+    private boolean isP1Marker, isP2Marker = false;
 
     public Chomp() {
         setUpWindow();
@@ -29,7 +31,6 @@ public class Chomp extends JFrame implements ActionListener {
         window = getContentPane();
         window.setLayout(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1600, 800);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setResizable(true);
         setVisible(true);
@@ -97,6 +98,24 @@ public class Chomp extends JFrame implements ActionListener {
         textPane.setEditable(false);
         textPane.setBackground(null);
         window.add(textPane);
+
+        p1Marker = new JButton();
+        p1Marker.setBounds(0, window.getHeight() - 100, 50, 50);
+        p1Marker.setBackground(Color.RED);
+        p1Marker.setOpaque(true);
+        p1Marker.setContentAreaFilled(true);
+        p1Marker.setBorderPainted(true);
+        p1Marker.addActionListener(this);
+        window.add(p1Marker);
+
+        p2Marker = new JButton();
+        p2Marker.setBounds(50, window.getHeight() - 100, 50, 50);
+        p2Marker.setBackground(Color.BLUE);
+        p2Marker.setOpaque(true);
+        p2Marker.setContentAreaFilled(true);
+        p2Marker.setBorderPainted(true);
+        p2Marker.addActionListener(this);
+        window.add(p2Marker);
     }
 
     private boolean isInButtons(JButton button) {
@@ -133,24 +152,71 @@ public class Chomp extends JFrame implements ActionListener {
                 window.repaint();
                 setUpBoard();
             }
+            if (e.getSource() == p1Marker) {
+                isP1Marker = !isP1Marker;
+                // if is p1 marker, set p2 marker to false
+                if (isP1Marker) {
+                    isP2Marker = false;
+                }
+                // change color of button to show it is selected
+                if (isP1Marker) {
+                    p1Marker.setBackground(Color.RED);
+                    p2Marker.setBackground(null);
+                } else {
+                    p1Marker.setBackground(Color.RED);
+                    p2Marker.setBackground(Color.BLUE);
+                }
+            }
+            if (e.getSource() == p2Marker) {
+                isP2Marker = !isP2Marker;
+                
+                if (isP2Marker) {
+                    isP1Marker = false;
+                }
+
+                if (isP2Marker) {
+                    p2Marker.setBackground(Color.BLUE);
+                    p1Marker.setBackground(null);
+                } else {
+                    p2Marker.setBackground(Color.BLUE);
+                    p1Marker.setBackground(Color.RED);
+                }
+            }
             if(isInButtons((JButton)e.getSource())) {
                 isPlayer1Turn = !isPlayer1Turn;
                 textPane.setText(isPlayer1Turn ? "Player 1's turn" : "Player 2's turn");
                 JButton button = (JButton)e.getSource();
-                for (int i = 0; i < yBoardSize; i++) {
-                    for (int j = 0; j < xBoardSize; j++) {
-                        if (button == buttons[i][j]) {
-                            for (int k = i; k < yBoardSize; k++) {
-                                for (int l = j; l < xBoardSize; l++) {
-                                    if (k == 0 || l == 0)
-                                    {
-                                        buttons[k][l].setOpaque(false);
-                                        buttons[k][l].setContentAreaFilled(false);
-                                        buttons[k][l].setBorderPainted(false);
-                                        board[k][l].eat();
-                                    } else {
-                                        buttons[k][l].setVisible(false);
-                                        board[k][l].eat();
+                if (isP1Marker) {
+                    // toggle color of button
+                    if (button.getBackground() == Color.RED) {
+                        button.setBackground(null);
+                    } else {
+                        button.setBackground(Color.RED);
+                    }
+                } else if (isP2Marker) {
+                    if (button.getBackground() == Color.BLUE) {
+                        button.setBackground(null);
+                    } else {
+                        button.setBackground(Color.BLUE);
+                    }
+                }
+                else {
+                    for (int i = 0; i < yBoardSize; i++) {
+                        for (int j = 0; j < xBoardSize; j++) {
+                            if (button == buttons[i][j]) {
+                                // eat squares above and to the right
+                                for (int k = i; k >= 0; k--) {
+                                    for (int l = j; l < xBoardSize; l++) {
+                                        if (k == 0 || l == 0)
+                                        {
+                                            buttons[k][l].setOpaque(false);
+                                            buttons[k][l].setContentAreaFilled(false);
+                                            buttons[k][l].setBorderPainted(false);
+                                            board[k][l].eat();
+                                        } else {
+                                            buttons[k][l].setVisible(false);
+                                            board[k][l].eat();
+                                        }
                                     }
                                 }
                             }
