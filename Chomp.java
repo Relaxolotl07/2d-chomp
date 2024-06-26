@@ -27,9 +27,14 @@ public class Chomp extends JFrame implements ActionListener {
     private JButton softResetButton;
     private JButton switchTurnButton;
 
+    private Positions positions;
+    private ArrayList<Integer> currentPosition;
+    private JButton setPWinPosition, setNWinPosition;
+
     public Chomp() {
         setUpWindow();
         setUpGame();
+        setUpPastPos();
     }
 
     private void setUpWindow() {
@@ -60,6 +65,9 @@ public class Chomp extends JFrame implements ActionListener {
 
     private void setUpBoard() {
         turn = 1;
+        currentPosition = new ArrayList<Integer>();
+        currentPosition.add(xBoardSize);
+        currentPosition.add(yBoardSize);
 
         panel = new JPanel();  
         panel.setLayout(new GridBagLayout());
@@ -139,6 +147,58 @@ public class Chomp extends JFrame implements ActionListener {
         switchTurnButton.setBounds(200, window.getHeight() - 100, 100, 50);
         switchTurnButton.addActionListener(this);
         window.add(switchTurnButton);
+
+        setPWinPosition = new JButton("Save P Win");
+        setPWinPosition.setBounds(300, window.getHeight() - 100, 100, 50);
+        setPWinPosition.addActionListener(this);
+        window.add(setPWinPosition);
+
+        setNWinPosition = new JButton("Save N Win");
+        setNWinPosition.setBounds(400, window.getHeight() - 100, 100, 50);
+        setNWinPosition.addActionListener(this);
+        window.add(setNWinPosition);
+
+    }
+
+    private void setUpPastPos() {
+        positions= new Positions();
+    }
+
+    public void logPosition(char winner) {
+
+        currentPosition = calculatePosition();
+
+        positions.addPosition(new PositionGrid(currentPosition, winner));
+    }
+
+    public ArrayList<Integer> calculatePosition() {
+        ArrayList<Integer> position = new ArrayList<Integer>();
+        // get the current position
+        int rowCounter = 0;
+        int colCounter = 0;
+        while (rowCounter < yBoardSize) {
+            // if below is not eaten, go right
+            int counter = 0;
+            while (colCounter < xBoardSize && !board[rowCounter][colCounter].isEaten()) {
+                colCounter++;
+                counter++;
+            }
+            position.add(counter);
+
+            // below is not eaten:
+            counter = 0;
+            if (colCounter < xBoardSize) {
+                while (rowCounter < yBoardSize && board[rowCounter][colCounter].isEaten()) {
+                    rowCounter++;
+                    counter++;
+                }
+            } else {
+                counter = yBoardSize - rowCounter;
+                rowCounter = yBoardSize;
+            }
+            position.add(counter);
+        }
+        return position;
     }
 
     private boolean isInButtons(JButton button) {
@@ -155,6 +215,12 @@ public class Chomp extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() instanceof JButton) {
+            if (e.getSource() == setPWinPosition) {
+                logPosition('P');
+            }
+            if (e.getSource() == setNWinPosition) {
+                logPosition('N');
+            }
             if (e.getSource() == restartButton) {
                 window.removeAll();
                 window.repaint();
@@ -173,7 +239,7 @@ public class Chomp extends JFrame implements ActionListener {
                 if (turn < 0) {
                     return;
                 }
-                
+                int maxRow = 0, maxCol = 0;
                 // loop through the last buttons pressed and uneat all squares on turn number
                 for (int i = 0; i < yBoardSize; i++) {
                     for (int j = 0; j < xBoardSize; j++) {
@@ -185,10 +251,13 @@ public class Chomp extends JFrame implements ActionListener {
                                 buttons[i][j].setBorderPainted(true);
                                 buttons[i][j].setText((j + 1) + ", " + (Math.abs(i - yBoardSize)));
                                 board[i][j].unEat();
+                                
                             } else {
                                 buttons[i][j].setVisible(true);
                                 board[i][j].unEat();
                             }
+                            maxRow = Math.max(maxRow, i);
+                            maxCol = Math.max(maxCol, j);
                         }
                     }
                 }
@@ -288,6 +357,7 @@ public class Chomp extends JFrame implements ActionListener {
                     }
                 }
                 turn++;
+                //!!! checkPosition(); 
             }
         }
     }
