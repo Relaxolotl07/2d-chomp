@@ -30,6 +30,7 @@ public class Chomp extends JFrame implements ActionListener {
     private Positions positions;
     private ArrayList<Integer> currentPosition;
     private JButton setPWinPosition, setNWinPosition;
+    private JTextPane winPosition;
 
     public Chomp() {
         setUpWindow();
@@ -158,6 +159,12 @@ public class Chomp extends JFrame implements ActionListener {
         setNWinPosition.addActionListener(this);
         window.add(setNWinPosition);
 
+        winPosition = new JTextPane();
+        winPosition.setBounds(500, window.getHeight() - 100, 100, 50);
+        winPosition.setEditable(false);
+        winPosition.setBackground(null);
+        window.add(winPosition);
+
     }
 
     private void setUpPastPos() {
@@ -169,6 +176,18 @@ public class Chomp extends JFrame implements ActionListener {
         currentPosition = calculatePosition();
 
         positions.addPosition(new PositionGrid(currentPosition, winner));
+    }
+
+    public void checkPosition() {
+        currentPosition = calculatePosition();
+        PositionGrid position = positions.findPosition(currentPosition);
+        if (position != null) {
+            if (position.getPositionType() == 'P') {
+                winPosition.setText("P position");
+            } else {
+                winPosition.setText("N position");
+            }
+        }
     }
 
     public ArrayList<Integer> calculatePosition() {
@@ -358,6 +377,7 @@ public class Chomp extends JFrame implements ActionListener {
                 }
                 turn++;
                 //!!! checkPosition(); 
+                checkPosition();
             }
         }
     }
